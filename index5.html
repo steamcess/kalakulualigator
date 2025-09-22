@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator Gemini 2.5 Pro</title>
+    <!-- Memuat library math.js dari CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.min.js"></script>
+    <style>
+        /* Desain dan Tampilan (CSS) */
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap');
+
+        :root {
+            --bg-color: #22252D;
+            --container-color: #292D36;
+            --display-bg: #22252D;
+            --btn-bg: #272B33;
+            --text-color: #FFFFFF;
+            --operator-color: #F37A7A;
+            --special-color: #26F2D2;
+            --equal-color: #F37A7A;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: var(--bg-color);
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+        }
+
+        .calculator {
+            width: 100%;
+            max-width: 340px;
+            background-color: var(--container-color);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .display {
+            width: 100%;
+            height: 80px;
+            background-color: var(--display-bg);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            padding: 0 20px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            font-size: 2.5rem;
+            color: var(--text-color);
+            overflow: hidden;
+            text-align: right;
+            word-break: break-all;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .btn {
+            height: 60px;
+            border-radius: 10px;
+            border: none;
+            background-color: var(--btn-bg);
+            color: var(--text-color);
+            font-size: 1.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn:hover {
+            background-color: #363a42;
+        }
+        
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn.operator {
+            color: var(--operator-color);
+        }
+
+        .btn.special {
+            color: var(--special-color);
+        }
+
+        .btn.equal {
+            background-color: var(--equal-color);
+            color: var(--text-color);
+            grid-column: span 2;
+        }
+        
+        .btn.equal:hover {
+            background-color: #d86868;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="calculator">
+        <div class="display" id="display">0</div>
+        <div class="buttons">
+            <!-- Baris 1 -->
+            <button class="btn special" data-value="C">C</button>
+            <button class="btn special" data-value="(">(</button>
+            <button class="btn special" data-value=")">)</button>
+            <button class="btn operator" data-value="/">÷</button>
+            <!-- Baris 2 -->
+            <button class="btn" data-value="7">7</button>
+            <button class="btn" data-value="8">8</button>
+            <button class="btn" data-value="9">9</button>
+            <button class="btn operator" data-value="*">×</button>
+            <!-- Baris 3 -->
+            <button class="btn" data-value="4">4</button>
+            <button class="btn" data-value="5">5</button>
+            <button class="btn" data-value="6">6</button>
+            <button class="btn operator" data-value="-">-</button>
+            <!-- Baris 4 -->
+            <button class="btn" data-value="1">1</button>
+            <button class="btn" data-value="2">2</button>
+            <button class="btn" data-value="3">3</button>
+            <button class="btn operator" data-value="+">+</button>
+            <!-- Baris 5 -->
+            <button class="btn" data-value="%">%</button>
+            <button class="btn" data-value="0">0</button>
+            <button class="btn" data-value=".">.</button>
+            <button class="btn equal" data-value="=">=</button>
+        </div>
+    </div>
+
+    <script>
+        // Logika Kalkulator (JavaScript)
+        const display = document.getElementById('display');
+        const buttons = document.querySelectorAll('.btn');
+
+        let currentExpression = '';
+        let justCalculated = false;
+
+        buttons.forEach(button => {
+            button.addEventListener('click', () => {
+                const value = button.dataset.value;
+
+                if (value === '=') {
+                    handleEquals();
+                } else if (value === 'C') {
+                    handleClear();
+                } else {
+                    handleInput(value);
+                }
+            });
+        });
+
+        function handleInput(value) {
+            // Jika hasil baru saja dihitung, dan input berikutnya adalah angka, reset ekspresi
+            if (justCalculated && !isOperator(value) && value !== '%' && value !== '.') {
+                currentExpression = '';
+            }
+            justCalculated = false;
+
+            // Mencegah operator ganda, kecuali untuk tanda kurung
+            if (isOperator(value) && isOperator(currentExpression.slice(-1))) {
+                if (currentExpression.slice(-1) !== ')' && value !== '(') {
+                   return; // Abaikan jika operator sudah ada
+                }
+            }
+            
+            if (currentExpression === '' && (isOperator(value) && value !== '(') ) {
+                return; // Jangan mulai dengan operator selain '('
+            }
+
+            currentExpression += value;
+            updateDisplay();
+        }
+
+        function handleClear() {
+            currentExpression = '';
+            justCalculated = false;
+            updateDisplay();
+        }
+
+        function handleEquals() {
+            if (currentExpression === '') return;
+
+            try {
+                // Ganti simbol visual dengan yang bisa diproses math.js
+                let evalExpression = currentExpression.replace(/×/g, '*').replace(/÷/g, '/');
+                
+                // Logika untuk menangani persen
+                // math.js menggunakan % untuk modulo. Kita ubah 'n%' menjadi '(n/100)'
+                evalExpression = evalExpression.replace(/(\d+\.?\d*)%/g, '($1/100)');
+
+                // Cek jika ada kurung yang tidak ditutup
+                const openParen = (evalExpression.match(/\(/g) || []).length;
+                const closeParen = (evalExpression.match(/\)/g) || []).length;
+                if (openParen !== closeParen) {
+                    display.innerText = 'Error';
+                    currentExpression = '';
+                    return;
+                }
+
+                const result = math.evaluate(evalExpression);
+                
+                // Format hasil agar tidak terlalu panjang
+                currentExpression = parseFloat(result.toPrecision(12)).toString();
+                justCalculated = true;
+            } catch (error) {
+                console.error("Calculation Error:", error);
+                currentExpression = 'Error';
+            }
+            updateDisplay();
+        }
+        
+        function isOperator(char) {
+            return ['+', '-', '*', '/'].includes(char);
+        }
+
+        function updateDisplay() {
+            let displayValue = currentExpression.replace(/\*/g, '×').replace(/\//g, '÷');
+            display.innerText = displayValue === '' ? '0' : displayValue;
+        }
+
+    </script>
+
+</body>
+</html>
