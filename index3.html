@@ -1,0 +1,217 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Kalkulator Modern</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Font Awesome (ikon backspace) -->
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"
+        integrity="sha512-..."
+        crossorigin="anonymous" referrerpolicy="no-referrer"/>
+  <!-- Math.js (CDN) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.3.1/math.min.js"
+          integrity="sha512-..."
+          crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <style>
+    /* ---------- Reset & dasar ---------- */
+    * { box-sizing: border-box; }
+    body {
+      margin:0;
+      font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+      background: #eaeff2;
+      display: flex;
+      justify-content: center;
+      align-items: start;
+      min-height: 100vh;
+      padding-top: 2rem;
+    }
+
+    /* ---------- Kalkulator ---------- */
+    .calculator {
+      width: 340px;
+      background:#fff;
+      border-radius:12px;
+      box-shadow:0 6px 18px rgba(0,0,0,.12);
+      padding:20px;
+    }
+
+    /* ---------- Layar ---------- */
+    .display {
+      width:100%;
+      height:56px;
+      font-size:1.8rem;
+      text-align:right;
+      padding:0 12px;
+      border:none;
+      border-radius:8px;
+      background:#f7f9fb;
+      overflow-x:auto;
+      white-space:nowrap;
+      color:#333;
+    }
+    .display.error {
+      background:#ffebeb;
+      color:#c00;
+    }
+
+    /* ---------- Grid tombol ---------- */
+    .grid {
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:8px;
+      margin-top:12px;
+    }
+    button {
+      height:56px;
+      font-size:1.2rem;
+      border:none;
+      border-radius:8px;
+      cursor:pointer;
+      transition:.15s background, .1s transform;
+    }
+    button:hover { background:#e0e0e0; }
+    button:active { transform:scale(.95); }
+
+    .operator { background:#ff9900; color:#fff; }
+    .operator:hover { background:#ff8000; }
+    .control { background:#d6d6d6; }
+    .control:hover { background:#c0c0c0; }
+
+    /* ---------- Responsif kecil ---------- */
+    @media (max-width:380px){
+      .calculator{ width:100%; margin:0 8px; }
+    }
+  </style>
+</head>
+
+<body>
+<div class="calculator">
+  <!-- tampilan -->
+  <input type="text" id="display" class="display" placeholder="0" readonly>
+
+  <!-- tombol -->
+  <div class="grid">
+    <!-- Baris 1 -->
+    <button class="control" onclick="clearAll()">AC</button>
+    <button class="control" onclick="backspace()">
+      <i class="fa-solid fa-delete-left"></i>
+    </button>
+    <button class="operator" onclick="input('%')">%</button>
+    <button class="operator" onclick="input('/')">÷</button>
+
+    <!-- Baris 2 -->
+    <button onclick="input('7')">7</button>
+    <button onclick="input('8')">8</button>
+    <button onclick="input('9')">9</button>
+    <button class="operator" onclick="input('*')">×</button>
+
+    <!-- Baris 3 -->
+    <button onclick="input('4')">4</button>
+    <button onclick="input('5')">5</button>
+    <button onclick="input('6')">6</button>
+    <button class="operator" onclick="input('-')">−</button>
+
+    <!-- Baris 4 -->
+    <button onclick="input('1')">1</button>
+    <button onclick="input('2')">2</button>
+    <button onclick="input('3')">3</button>
+    <button class="operator" onclick="input('+')">+</button>
+
+    <!-- Baris 5 -->
+    <button class="control" style="grid-column:span 2;" onclick="input('0')">0</button>
+    <button onclick="input('.')">.</button>
+    <button class="operator" onclick="calculate()">=</button>
+  </div>
+</div>
+
+<script>
+/* =====================  GLOBAL ===================== */
+const display = document.getElementById('display');
+
+/* -----------------  Utility ----------------- */
+function setDisplay(value, isError = false) {
+  display.value = value;
+  if (isError) display.classList.add('error');
+  else display.classList.remove('error');
+}
+
+/* -----------------  Input ----------------- */
+function input(ch) {
+  // Jika sebelumnya ada error → bersihkan dulu
+  if (display.classList.contains('error')) setDisplay('');
+
+  // Hindari angka berlebih 0 di depan (misal 00)
+  if (display.value === '0' && /^[0-9]$/.test(ch)) {
+    setDisplay(ch);
+    return;
+  }
+
+  // Cegah duplikat operator (misal ++ atau **)
+  const operators = '+-*/%';
+  if (operators.includes(ch) && operators.includes(display.value.slice(-1))) {
+    // ganti operator terakhir dengan yang baru
+    setDisplay(display.value.slice(0, -1) + ch);
+    return;
+  }
+
+  setDisplay(display.value + ch);
+}
+
+/* -----------------  Kontrol ----------------- */
+function clearAll() { setDisplay(''); }
+function backspace() { setDisplay(display.value.slice(0, -1)); }
+
+/* -----------------  Persentase ----------------- */
+/* 
+   Math.js mengartikan % sebagai “modulo”.  
+   Pada kebanyakan kalkulator, % berarti “bagi 100”.
+   Kita ubah token “angka%” menjadi “(angka/100)”.
+*/
+function preprocessPercent(expr) {
+  // contoh: 23% → (23/100)
+  return expr.replace(/(\d+(\.\d+)?)%/g, '($1/100)');
+}
+
+/* -----------------  Evaluasi ----------------- */
+function calculate() {
+  const raw = display.value.trim();
+  if (!raw) { setDisplay('0'); return; }
+
+  // ubah persen menjadi pembagian 100
+  const expr = preprocessPercent(raw);
+
+  try {
+    const result = math.evaluate(expr);
+    setDisplay(String(result));
+  } catch (e) {
+    setDisplay('Error', true);
+    // bersihkan layar setelah 1,5 detik
+    setTimeout(() => setDisplay(''), 1500);
+  }
+}
+
+/* -----------------  Keyboard support ----------------- */
+document.addEventListener('keydown', (e) => {
+  const k = e.key;
+  // angka & titik
+  if (/^[0-9.]$/.test(k)) { e.preventDefault(); input(k); return; }
+  // operator standar
+  if (['+','-','*','/','%'].includes(k)) { e.preventDefault(); input(k); return; }
+  // Enter / = → hitung
+  if (k === 'Enter' || k === '=') { e.preventDefault(); calculate(); return; }
+  // Backspace → hapus satu karakter
+  if (k === 'Backspace') { e.preventDefault(); backspace(); return; }
+  // Escape → bersihkan semua
+  if (k === 'Escape') { e.preventDefault(); clearAll(); }
+});
+
+/* -----------------  Helper ----------------- */
+function isOperator(ch){
+  return '+-*/%'.includes(ch);
+}
+</script>
+</body>
+</html>
