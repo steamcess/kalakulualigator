@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -180,7 +181,7 @@
             <!-- Row 2 -->
             <button class="btn btn-function" onclick="memoryRecall()">MR</button>
             <button class="btn btn-function" onclick="memoryClear()">MC</button>
-            <button class="btn btn-function" onclick="memoryAdd()">M+</button>
+            <button class="btn btn-function" onclick="addToExpression('%')">%</button>
             <button class="btn btn-operator" onclick="addToExpression('*')">×</button>
             
             <!-- Row 3 -->
@@ -236,10 +237,13 @@
             if (!currentExpression) return;
             
             try {
-                // Use Math.js to evaluate the expression
-                const result = math.evaluate(currentExpression);
+                // Proses persentase: ubah angka% menjadi (angka/100)
+                let processedExpression = currentExpression.replace(/(\d+(?:\.\d+)?)%/g, '($1/100)');
                 
-                // Handle division by zero or invalid operations
+                // Gunakan Math.js untuk evaluasi ekspresi
+                const result = math.evaluate(processedExpression);
+                
+                // Handle division by zero atau operasi invalid
                 if (!isFinite(result)) {
                     throw new Error('Invalid operation');
                 }
@@ -317,12 +321,12 @@
         function formatNumber(num) {
             if (Math.abs(num) < 1e-10) return '0';
             
-            // For very large or very small numbers, use scientific notation
+            // Untuk angka sangat besar atau sangat kecil, gunakan notasi ilmiah
             if (Math.abs(num) >= 1e12 || (Math.abs(num) < 1e-6 && num !== 0)) {
                 return num.toExponential(6);
             }
             
-            // For regular numbers, limit decimal places
+            // Untuk angka biasa, batasi desimal
             if (num % 1 === 0) {
                 return num.toString();
             } else {
@@ -334,12 +338,12 @@
         document.addEventListener('keydown', function(event) {
             const key = event.key;
             
-            // Prevent default for calculator keys
-            if ('0123456789+-*/.()='.includes(key) || key === 'Enter' || key === 'Backspace' || key === 'Escape') {
+            // Prevent default untuk tombol kalkulator
+            if ('0123456789+-*/.()=%'.includes(key) || key === 'Enter' || key === 'Backspace' || key === 'Escape') {
                 event.preventDefault();
             }
             
-            // Handle keyboard input
+            // Handle input keyboard
             if ('0123456789'.includes(key)) {
                 addToExpression(key);
             } else if (key === '+') {
@@ -354,6 +358,8 @@
                 addToExpression('.');
             } else if (key === '(' || key === ')') {
                 addToExpression(key);
+            } else if (key === '%') {
+                addToExpression('%');
             } else if (key === 'Enter' || key === '=') {
                 calculate();
             } else if (key === 'Backspace') {
