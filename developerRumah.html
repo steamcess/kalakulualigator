@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>[Nama Komplek] — Hunian Berkelas, Karya Bernilai</title>
+  <meta name="description" content="Koleksi rumah berarsitektur kontemporer, dibangun dengan standar tinggi dan detail bernilai seni.">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* =======================
+       PALET & DASAR ESTETIK
+       ======================= */
+    :root{
+      --bg: #0f0f12;              /* canvas gelap mewah */
+      --ink: #eae9e6;             /* teks utama */
+      --muted: #bcbab4;           /* teks sekunder */
+      --gold: #c8a96a;            /* aksen emas hangat */
+      --stone: #1a1a1f;           /* panel */
+      --line: rgba(232,230,222,.12);
+      --ring: rgba(200,169,106,.35);
+      --grad1: #131318;
+      --grad2: #191a20;
+      --grad3: #0e0f12;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Apple Color Emoji","Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(1200px 600px at 85% -10%, rgba(200,169,106,.08), transparent 60%),
+        radial-gradient(900px 500px at 10% -10%, rgba(124,108,255,.05), transparent 55%),
+        linear-gradient(180deg, var(--grad1), var(--grad2) 50%, var(--grad3));
+      letter-spacing: .01em;
+    }
+    img{max-width:100%; display:block}
+    a{color:inherit; text-decoration:none}
+    .container{width:min(1200px, 92vw); margin-inline:auto}
+
+    /* =======================
+       NAVIGASI
+       ======================= */
+    .nav{
+      position:sticky; top:0; z-index:50;
+      backdrop-filter: blur(8px);
+      background: linear-gradient(180deg, rgba(15,15,18,.75), rgba(15,15,18,.35));
+      border-bottom: 1px solid var(--line);
+    }
+    .nav-inner{
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 16px 0;
+    }
+    .brand{
+      display:flex; align-items:center; gap:12px; font-weight:600;
+      letter-spacing:.04em;
+    }
+    .brand-mark{
+      width:28px; height:28px; border-radius:8px;
+      background:
+        conic-gradient(from 210deg, rgba(200,169,106,.9), rgba(200,169,106,.25) 40%, transparent 41%),
+        radial-gradient(120% 120% at 30% 30%, rgba(255,255,255,.2), rgba(255,255,255,0));
+      border:1px solid var(--ring);
+      box-shadow: 0 0 0 2px rgba(200,169,106,.08), 0 10px 30px rgba(0,0,0,.35) inset;
+    }
+    .nav-links{display:flex; gap:22px; font-size:14.5px; color:var(--muted)}
+    .nav-links a{padding:8px 6px; border-radius:8px}
+    .nav-links a:hover{color:var(--ink); background:rgba(234,233,230,.05)}
+
+    .cta{
+      display:inline-flex; align-items:center; gap:10px;
+      padding:10px 16px; border-radius:12px;
+      border:1px solid var(--ring);
+      background:linear-gradient(180deg, rgba(200,169,106,.12), rgba(200,169,106,.04));
+      color:var(--ink); font-weight:600;
+      box-shadow: 0 6px 20px rgba(200,169,106,.12), inset 0 1px 0 rgba(255,255,255,.05);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .cta:hover{transform: translateY(-1px); box-shadow: 0 10px 28px rgba(200,169,106,.16)}
+
+    /* =======================
+       HERO
+       ======================= */
+    .hero{
+      position:relative;
+      padding: 72px 0 56px;
+      overflow:hidden;
+    }
+    .hero-grid{
+      display:grid; grid-template-columns: 1.15fr .85fr; gap:48px; align-items:center;
+    }
+    @media (max-width: 980px){ .hero-grid{grid-template-columns: 1fr; gap:36px} }
+    .eyebrow{
+      color:var(--gold); letter-spacing:.28em; text-transform:uppercase; font-size:12px; font-weight:600;
+    }
+    .display{
+      font-family: "Playfair Display", serif;
+      font-weight:600; line-height:1.08;
+      font-size: clamp(36px, 5vw, 64px);
+      margin:10px 0 16px;
+    }
+    .lead{color:var(--muted); font-size: clamp(16px, 2.2vw, 18px); line-height:1.6; max-width: 58ch}
+    .hero-fig{
+      position:relative; aspect-ratio: 4/3; border-radius: 24px; overflow:hidden;
+      background:
+        linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.15)),
+        url('') center/cover no-repeat;
+      /* GANTI DI SINI: Anda bisa isi URL foto hero proyek Anda di atas (url('...')) */
+      box-shadow: 0 30px 100px rgba(0,0,0,.6), 0 0 0 1px var(--line) inset;
+    }
+    .hero-fig::before{
+      /* lapisan seni: grid halus */
+      content:""; position:absolute; inset:0;
+      background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,.06) 1px, transparent 1px);
+      background-size: 22px 22px; opacity:.35; mix-blend-mode: overlay;
+    }
+    .hero-badges{
+      display:flex; flex-wrap:wrap; gap:10px; margin-top:20px;
+    }
+    .badge{
+      border:1px solid var(--line); color:var(--muted); font-size:12.5px;
+      padding:8px 10px; border-radius:10px; background:rgba(255,255,255,.02)
+    }
+
+    /* =======================
+       GRID KOLEKSI (Kartu Rumah)
+       ======================= */
+    .section{padding: 72px 0}
+    .section h2{
+      font-family:"Playfair Display", serif; font-size: clamp(28px, 3.6vw, 44px);
+      margin:0 0 6px;
+    }
+    .section p.sub{color:var(--muted); margin:0 0 28px}
+    .grid{
+      display:grid; gap:22px;
+      grid-template-columns: repeat(3, 1fr);
+    }
+    @media (max-width: 1100px){ .grid{grid-template-columns: repeat(2, 1fr)} }
+    @media (max-width: 700px){ .grid{grid-template-columns: 1fr} }
+
+    .card{
+      border-radius:20px; overflow:hidden; background:linear-gradient(180deg, #16161b, #111115);
+      border:1px solid var(--line);
+      box-shadow: 0 16px 50px rgba(0,0,0,.35);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .card:hover{ transform: translateY(-3px); box-shadow: 0 26px 80px rgba(0,0,0,.45) }
+    .media{
+      aspect-ratio: 4/3;
+      background:
+        radial-gradient(120% 120% at 80% 20%, rgba(200,169,106,.15), transparent 40%),
+        url('') center/cover no-repeat; /* GANTI DI SINI untuk tiap kartu via style inline di HTML */
+      position:relative;
+    }
+    .price-tag{
+      position:absolute; top:14px; left:14px;
+      background: rgba(15,15,18,.7);
+      border:1px solid var(--ring); color:var(--ink);
+      padding:8px 10px; border-radius:10px; font-weight:600; font-size:13px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06);
+    }
+    .content{padding:16px 16px 18px}
+    .title{font-weight:600; font-size:18px; margin:4px 0 6px}
+    .meta{display:flex; gap:12px; flex-wrap:wrap; font-size:13px; color:var(--muted)}
+    .divider{height:1px; background:var(--line); margin:14px 0}
+    .row{display:flex; align-items:center; justify-content:space-between; gap:12px}
+    .btn-row{display:flex; gap:10px}
+    .btn{
+      display:inline-flex; align-items:center; gap:8px; padding:9px 12px;
+      border-radius:10px; font-weight:600; font-size:13.5px; border:1px solid var(--line); color:var(--ink);
+      background: rgba(255,255,255,.02);
+    }
+    .btn.primary{
+      border-color: var(--ring);
+      background: linear-gradient(180deg, rgba(200,169,106,.18), rgba(200,169,106,.06));
+    }
+    .btn:hover{filter: brightness(1.05)}
+
+    /* =======================
+       KEUNGGULAN
+       ======================= */
+    .features{
+      display:grid; grid-template-columns: repeat(3,1fr); gap:22px;
+    }
+    @media (max-width: 980px){ .features{grid-template-columns: 1fr} }
+    .feature{
+      background:linear-gradient(180deg, #16161b, #111115);
+      border:1px solid var(--line); border-radius:20px; padding:20px;
+    }
+    .feature h3{margin:6px 0 10px; font-size:18px}
+    .feature p{color:var(--muted); margin:0}
+
+    /* =======================
+       TESTIMONI
+       ======================= */
+    .testi{
+      display:grid; grid-template-columns: 1.2fr .8fr; gap:24px; align-items:center;
+    }
+    @media (max-width: 980px){ .testi{grid-template-columns:1fr} }
+    .quote{
+      font-family:"Playfair Display", serif; font-size: clamp(22px, 2.6vw, 28px); line-height:1.35;
+      background: linear-gradient(180deg, rgba(200,169,106,.14), transparent 70%);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .quote small{display:block; margin-top:12px; color:var(--muted); font-family:Inter}
+    .testi-card{
+      border:1px solid var(--line); border-radius:18px; padding:18px;
+      background:linear-gradient(180deg, #16161b, #111115);
+    }
+
+    /* =======================
+       LOKASI & PETA
+       ======================= */
+    .map{
+      aspect-ratio: 16/9; border-radius: 20px; overflow: hidden;
+      border:1px solid var(--line);
+      background: radial-gradient(120% 120% at 70% 0%, rgba(200,169,106,.12), transparent 55%), #0e0f12;
+    }
+    .map iframe{width:100%; height:100%; border:0; filter: contrast(1.1) saturate(1.05) brightness(.9)}
+
+    /* =======================
+       FORM MINAT
+       ======================= */
+    .panel{
+      border:1px solid var(--line); border-radius:22px; padding:22px;
+      background:linear-gradient(180deg, #16161b, #111115);
+    }
+    form{display:grid; gap:14px; grid-template-columns: 1fr 1fr}
+    form .full{grid-column:1 / -1}
+    label{display:block; font-size:13px; color:var(--muted); margin-bottom:6px}
+    input, select, textarea{
+      width:100%; padding:12px 14px; border-radius:12px;
+      background:#0f1014; border:1px solid var(--line); color:var(--ink);
+      outline: none;
+    }
+    textarea{min-height:110px; resize:vertical}
+    .agree{display:flex; gap:10px; align-items:flex-start; font-size:13px; color:var(--muted)}
+    .agree input{margin-top:2px}
+    .submit{
+      grid-column:1 / -1; justify-self:start;
+      padding:12px 16px; border-radius:12px; border:1px solid var(--ring);
+      background:linear-gradient(180deg, rgba(200,169,106,.2), rgba(200,169,106,.06));
+      color:var(--ink); font-weight:700
+    }
+
+    /* =======================
+       FOOTER
+       ======================= */
+    footer{
+      padding:36px 0; color:var(--muted); border-top:1px solid var(--line);
+      background: linear-gradient(180deg, rgba(200,169,106,.06), transparent);
+    }
+    .foot{
+      display:flex; flex-wrap:wrap; gap:16px; align-items:center; justify-content:space-between
+    }
+
+    /* =======================
+       ANIMASI HALUS
+       ======================= */
+    .reveal{opacity:0; transform: translateY(12px); transition: all .6s cubic-bezier(.2,.8,.2,1)}
+    .reveal.in{opacity:1; transform:none}
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <header class="nav">
+    <div class="container nav-inner">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span><!-- GANTI DI SINI -->Arsena Developments</span>
+      </div>
+      <nav class="nav-links" aria-label="Utama">
+        <a href="#koleksi">Koleksi</a>
+        <a href="#keun">Keunggulan</a>
+        <a href="#lokasi">Lokasi</a>
+        <a href="#minat">Minat</a>
+      </nav>
+      <a class="cta" href="https://wa.me/6281234567890" target="_blank" rel="noopener">
+        ✦ Konsultasi
+      </a>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero container">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow">Karya Bernilai • Arsitektur Kontemporer</div>
+        <h1 class="display">Hunian yang Dirancang untuk <em>Hidup</em>, Bukan Sekadar Ditinggali</h1>
+        <p class="lead">
+          Setiap rumah kami adalah dialog antara cahaya, ruang, dan material—menggabungkan tata massa modern,
+          ventilasi silang, dan detail crafted by hand. Dibangun jujur, tahan lama, dan indah dipandang.
+        </p>
+
+        <div class="hero-badges">
+          <span class="badge">IMB & Legalitas Lengkap</span>
+          <span class="badge">Kualitas Konstruksi Terverifikasi</span>
+          <span class="badge">Garansi Struktural 10 Tahun</span>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:22px">
+          <a class="cta" href="#koleksi">Lihat Koleksi</a>
+          <a class="btn" href="tel:+622212345678">Hubungi: (022) 123 45678</a>
+        </div>
+      </div>
+
+      <figure class="hero-fig" aria-label="Foto fasad rumah unggulan">
+        <!-- opsional: tambahkan <img> jika ingin SEO gambar -->
+      </figure>
+    </div>
+  </section>
+
+  <!-- KOLEKSI -->
+  <section id="koleksi" class="section container reveal">
+    <h2>Koleksi Rumah</h2>
+    <p class="sub">Pilih tipologi yang menyatu dengan kebutuhan dan ritme harian Anda.</p>
+
+    <div class="grid">
+      <!-- Kartu 1 -->
+      <article class="card">
+        <div class="media" style="background-image:
+          radial-gradient(120% 120% at 80% 20%, rgba(200,169,106,.18), transparent 40%),
+          url('<!-- GANTI DI SINI: foto tipe A -->');">
+          <span class="price-tag">Mulai Rp 1,25 M</span>
+        </div>
+        <div class="content">
+          <div class="title">Tipe A — Courtyard Light</div>
+          <div class="meta">
+            <span>LT 90 m²</span>•<span>LB 120 m²</span>•<span>3 KT • 3 KM</span>•<span>Carport 2</span>
+          </div>
+          <div class="divider"></div>
+          <div class="row">
+            <div class="btn-row">
+              <a class="btn primary" href="#" aria-label="Lihat detail Tipe A">Detail</a>
+              <a class="btn" href="#">Brosur PDF</a>
+            </div>
+            <a class="btn" href="https://wa.me/6281234567890?text=Halo,%20saya%20minat%20Tipe%20A" target="_blank" rel="noopener">WhatsApp</a>
+          </div>
+        </div>
+      </article>
+
+      <!-- Kartu 2 -->
+      <article class="card">
+        <div class="media" style="background-image:
+          radial-gradient(120% 120% at 80% 20%, rgba(200,169,106,.18), transparent 40%),
+          url('<!-- GANTI DI SINI: foto tipe B -->');">
+          <span class="price-tag">Mulai Rp 1,48 M</span>
+        </div>
+        <div class="content">
+          <div class="title">Tipe B — Linear Breeze</div>
+          <div class="meta">
+            <span>LT 100 m²</span>•<span>LB 145 m²</span>•<span>4 KT • 3 KM</span>•<span>Void 6m</span>
+          </div>
+          <div class="divider"></div>
+          <div class="row">
+            <div class="btn-row">
+              <a class="btn primary" href="#" aria-label="Lihat detail Tipe B">Detail</a>
+              <a class="btn" href="#">Brosur PDF</a>
+            </div>
+            <a class="btn" href="https://wa.me/6281234567890?text=Halo,%20saya%20minat%20Tipe%20B" target="_blank" rel="noopener">WhatsApp</a>
+          </div>
+        </div>
+      </article>
+
+      <!-- Kartu 3 -->
+      <article class="card">
+        <div class="media" style="background-image:
+          radial-gradient(120% 120% at 80% 20%, rgba(200,169,106,.18), transparent 40%),
+          url('<!-- GANTI DI SINI: foto tipe C -->');">
+          <span class="price-tag">Mulai Rp 1,95 M</span>
+        </div>
+        <div class="content">
+          <div class="title">Tipe C — Atrium Verde</div>
+          <div class="meta">
+            <span>LT 128 m²</span>•<span>LB 178 m²</span>•<span>4+1 KT • 4 KM</span>•<span>Taman Dalam</span>
+          </div>
+          <div class="divider"></div>
+          <div class="row">
+            <div class="btn-row">
+              <a class="btn primary" href="#" aria-label="Lihat detail Tipe C">Detail</a>
+              <a class="btn" href="#">Brosur PDF</a>
+            </div>
+            <a class="btn" href="https://wa.me/6281234567890?text=Halo,%20saya%20minat%20Tipe%20C" target="_blank" rel="noopener">WhatsApp</a>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- KEUNGGULAN -->
+  <section id="keun" class="section container reveal">
+    <h2>Keunggulan Karya</h2>
+    <p class="sub">Lebih dari sekadar spesifikasi—ini tentang pengalaman ruang.</p>
+
+    <div class="features">
+      <div class="feature">
+        <div class="eyebrow">Ruang & Cahaya</div>
+        <h3>Ventilasi Silang & Void Proporsional</h3>
+        <p>Setiap tipologi dikalkulasi untuk sirkulasi alami, pencahayaan lembut, serta orientasi matahari & arah angin lokal.</p>
+      </div>
+      <div class="feature">
+        <div class="eyebrow">Material</div>
+        <h3>Palet Tahan Lama</h3>
+        <p>Kombinasi bata struktural, kusen aluminium arsitektural, dan penutup lantai berpori rendah untuk perawatan mudah.</p>
+      </div>
+      <div class="feature">
+        <div class="eyebrow">Detail</div>
+        <h3>Craftsmanship yang Jujur</h3>
+        <p>Dari joinery kayu hingga water proofing berlapis—detail kecil yang menjaga kualitas hingga puluhan tahun.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONI & PENGHARGAAN -->
+  <section class="section container reveal">
+    <div class="testi">
+      <div>
+        <blockquote class="quote">
+          “Proporsi ruangnya terasa menenangkan. Di pagi hari, cahaya menyapu dinding seperti lukisan—
+          menegaskan bahwa rumah bisa sekaligus fungsional dan puitis.”
+          <small>— Raka & Dinda, Pemilik Rumah Tipe B</small>
+        </blockquote>
+      </div>
+      <div class="testi-card">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px">
+          <span aria-hidden="true">✷</span>
+          <strong>Pengakuan & Kredibilitas</strong>
+        </div>
+        <ul style="margin:0; padding-left:18px; color:var(--muted); line-height:1.8">
+          <li>Finalis Desain Hunian Kontemporer 2024</li>
+          <li>Kontraktor Tersertifikasi • Pengawasan Independen</li>
+          <li>After-sales: Perawatan & Perbaikan Minor 12 Bulan</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOKASI -->
+  <section id="lokasi" class="section container reveal">
+    <h2>Lokasi Bernilai</h2>
+    <p class="sub">Akses dekat sekolah, fasilitas kesehatan, pusat kuliner, dan tol.</p>
+    <div class="map">
+      <!-- GANTI DI SINI: sematkan map lokasi proyek Anda -->
+      <!-- Contoh Google Maps Embed: ganti q= dengan alamat Anda -->
+      <iframe
+        title="Peta Lokasi Proyek"
+        loading="lazy"
+        allowfullscreen
+        referrerpolicy="no-referrer-when-downgrade"
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d0!2d107.619122!3d-6.917464!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1">
+      </iframe>
+    </div>
+  </section>
+
+  <!-- FORM MINAT -->
+  <section id="minat" class="section container reveal">
+    <div class="panel">
+      <div style="display:flex; align-items:end; justify-content:space-between; gap:18px; margin-bottom:14px">
+        <div>
+          <div class="eyebrow">Form Minat</div>
+          <h2>Jadwalkan Kunjungan Lokasi</h2>
+          <p class="sub">Isi data singkat di bawah. Tim kami akan menghubungi Anda dalam 1×24 jam.</p>
+        </div>
+        <a class="btn" href="https://wa.me/6281234567890?text=Halo,%20saya%20ingin%20jadwalkan%20kunjungan" target="_blank" rel="noopener">Chat WhatsApp</a>
+      </div>
+
+      <!-- Jika Anda ingin pakai Google Form, ganti <form> ini dengan iframe Google Form -->
+      <form id="leadForm" novalidate>
+        <div>
+          <label>Nama Lengkap</label>
+          <input type="text" name="nama" placeholder="Nama Anda" required>
+        </div>
+        <div>
+          <label>No. WhatsApp</label>
+          <input type="tel" name="wa" placeholder="08xxxxxxxxxx" required>
+        </div>
+        <div>
+          <label>Pilih Tipe Rumah</label>
+          <select name="tipe" required>
+            <option value="" disabled selected>Pilih...</option>
+            <option>Tipe A — Courtyard Light</option>
+            <option>Tipe B — Linear Breeze</option>
+            <option>Tipe C — Atrium Verde</option>
+          </select>
+        </div>
+        <div>
+          <label>Anggaran Kisaran</label>
+          <select name="budget">
+            <option value="" disabled selected>Pilih...</option>
+            <option>< Rp 1 M</option>
+            <option>Rp 1—1.5 M</option>
+            <option>Rp 1.5—2 M</option>
+            <option>> Rp 2 M</option>
+          </select>
+        </div>
+        <div class="full">
+          <label>Catatan</label>
+          <textarea name="catatan" placeholder="Preferensi, jadwal kunjungan, dsb."></textarea>
+        </div>
+        <div class="full agree">
+          <input id="agree" type="checkbox" required>
+          <label for="agree">Saya setuju untuk dihubungi melalui WhatsApp/telepon terkait informasi proyek ini.</label>
+        </div>
+        <button class="submit" type="submit">Kirim Minat</button>
+      </form>
+      <p id="formMsg" style="margin-top:10px; color:var(--muted)"></p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container foot">
+      <div>
+        © <span id="y"></span> <!-- GANTI DI SINI -->Arsena Developments. Semua hak cipta.
+      </div>
+      <div style="display:flex; gap:12px">
+        <a href="#" class="btn" aria-label="Lihat brosur lengkap">Brosur</a>
+        <a href="mailto:halo@arsena.dev" class="btn" aria-label="Email kami">Email</a>
+        <a href="https://wa.me/6281234567890" class="btn" target="_blank" rel="noopener" aria-label="WhatsApp kami">WhatsApp</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Tahun dinamis
+    document.getElementById('y').textContent = new Date().getFullYear();
+
+    // Animasi "reveal on scroll"
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+      });
+    }, {threshold:.12});
+    document.querySelectorAll('.reveal').forEach(el=> io.observe(el));
+
+    // Validasi form + contoh handler (ganti dengan endpoint/form Google bila perlu)
+    const f = document.getElementById('leadForm');
+    const msg = document.getElementById('formMsg');
+    f.addEventListener('submit', (e)=>{
+      e.preventDefault();
+
+      if(!f.checkValidity()){
+        msg.textContent = 'Mohon lengkapi semua bidang wajib.';
+        return;
+      }
+
+      // KUMPULKAN DATA
+      const data = Object.fromEntries(new FormData(f).entries());
+
+      // === GANTI DI SINI ===
+      // 1) Kirim ke Google Apps Script Web App / backend Anda
+      // 2) Atau ganti seluruh form di atas dengan IFRAME Google Form resmi
+      console.log('Lead terkirim:', data);
+
+      msg.textContent = 'Terima kasih! Data minat Anda telah kami terima. Tim kami akan segera menghubungi.';
+      f.reset();
+      document.getElementById('agree').checked = false;
+    });
+  </script>
+</body>
+</html>
