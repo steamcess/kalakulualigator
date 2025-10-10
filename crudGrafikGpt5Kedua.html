@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CRUD Tabel + Grafik • Light Pro</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <style>
+    :root{
+      --bg:#f9fafb;
+      --panel:#ffffff;
+      --ink:#0f172a;
+      --muted:#6b7280;
+      --brand:#2563eb;
+      --brand-ink:#1e40af;
+      --ring:rgba(37,99,235,.35);
+      --line:#e5e7eb;
+      --chip:#eef2ff;
+      --good:#059669;
+      --bad:#dc2626;
+      --radius:14px;
+      --radius-sm:10px;
+      --shadow:0 8px 30px rgba(2,6,23,.06), 0 2px 8px rgba(2,6,23,.04);
+      --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,system-ui,"Helvetica Neue",Arial;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;background:radial-gradient(1200px 800px at 85% -10%, #eef2ff 0%, transparent 55%) , var(--bg);
+      color:var(--ink); font: 15px/1.5 var(--font);
+      letter-spacing:.1px;
+    }
+    .wrap{
+      max-width:1200px; margin:48px auto; padding:0 24px;
+    }
+    header{
+      display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:28px;
+    }
+    .title{
+      display:flex; align-items:center; gap:14px;
+    }
+    .logo{
+      width:42px; height:42px; border-radius:14px;
+      background: conic-gradient(from 210deg, #60a5fa, #a78bfa, #93c5fd, #60a5fa);
+      box-shadow: 0 8px 24px rgba(99,102,241,.25), inset 0 1px 0 rgba(255,255,255,.5);
+    }
+    h1{font-size:20px; margin:0}
+    .sub{color:var(--muted); font-size:13px}
+
+    .grid{
+      display:grid; grid-template-columns: 1.1fr .9fr; gap:18px;
+    }
+    @media (max-width: 980px){ .grid{ grid-template-columns: 1fr; } }
+
+    .card{
+      background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .card-head{
+      display:flex; align-items:center; justify-content:space-between; padding:16px 18px; border-bottom:1px solid var(--line);
+    }
+    .card-head h2{font-size:14px; margin:0}
+    .card-body{ padding:16px 18px; }
+
+    /* Form */
+    form{
+      display:flex; flex-wrap:wrap; gap:12px; align-items:end;
+    }
+    label{font-size:12px; color:var(--muted); display:block; margin-bottom:6px}
+    .field{
+      flex:1 1 160px;
+    }
+    input[type="text"], input[type="number"]{
+      width:100%; height:42px; border:1px solid var(--line); border-radius:12px; padding:0 12px;
+      background:#fbfdff; outline:none; transition:.2s border, .2s box-shadow, .2s background;
+    }
+    input:focus{
+      border-color:var(--brand);
+      box-shadow: 0 0 0 4px var(--ring);
+      background:#fff;
+    }
+    .btn{
+      height:42px; padding:0 16px; border:1px solid transparent; border-radius:12px; cursor:pointer;
+      background:linear-gradient(180deg,#3b82f6,#2563eb); color:#fff; font-weight:600;
+      box-shadow: 0 10px 20px rgba(37,99,235,.2), inset 0 1px 0 rgba(255,255,255,.35);
+      transition: transform .06s ease, box-shadow .2s ease, filter .2s ease;
+    }
+    .btn:hover{ filter:brightness(1.03) }
+    .btn:active{ transform: translateY(1px) }
+    .btn.ghost{
+      background:#f8fafc; color:var(--brand); border-color:#dbeafe; box-shadow:none;
+    }
+
+    /* Chips for axis picker */
+    .chips{ display:flex; gap:8px; flex-wrap:wrap }
+    .chip{
+      display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px;
+      background:var(--chip); color:var(--brand-ink); border:1px solid #e0e7ff; font-weight:600; font-size:12px;
+    }
+    .chip select{
+      border:none; background:transparent; outline:none; color:var(--brand-ink); font-weight:600;
+    }
+
+    /* Table */
+    .table-wrap{ border:1px solid var(--line); border-radius:var(--radius-sm); overflow:auto }
+    table{ width:100%; border-collapse:separate; border-spacing:0 }
+    caption{ text-align:left; padding:12px 14px; color:var(--muted); font-size:13px }
+    thead th{
+      position:sticky; top:0; background:linear-gradient(180deg,#ffffff,#f8fafc);
+      text-align:left; font-size:12px; letter-spacing:.3px; color:#374151;
+      border-bottom:1px solid var(--line); padding:12px 14px;
+    }
+    tbody td{
+      border-bottom:1px solid var(--line); padding:12px 14px; font-size:14px;
+    }
+    tbody tr:hover{ background:#f9fbff }
+    tbody tr.selected{ outline:2px solid #c7d2fe; background:#eef2ff }
+    .num{ font-variant-numeric: tabular-nums; font-family: var(--mono) }
+
+    .row-actions{
+      display:flex; gap:8px;
+    }
+    .link{
+      background:#f1f5f9; border:1px solid #e5e7eb; color:#0f172a; padding:6px 10px; border-radius:10px;
+      cursor:pointer; font-size:12px; font-weight:600;
+    }
+    .link.red{ color:var(--bad); background:#fef2f2; border-color:#fee2e2 }
+    .link.green{ color:var(--good); background:#ecfdf5; border-color:#d1fae5 }
+
+    /* Chart card tweaks */
+    canvas{ width:100%; height:360px; display:block }
+    .legend{
+      display:flex; gap:12px; flex-wrap:wrap; align-items:center; color:var(--muted); font-size:12px; padding-top:8px;
+    }
+    .dot{ width:10px; height:10px; border-radius:999px; display:inline-block }
+    .dot.p{ background:#2563eb }
+    .dot.l{ background:#94a3b8 }
+
+    /* Focus visibility */
+    :focus-visible{ outline:2px solid var(--brand); outline-offset:2px; border-radius:8px }
+
+    /* Footer note */
+    footer{ margin-top:18px; color:var(--muted); font-size:12px }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header aria-label="Judul Halaman">
+      <div class="title">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>Light Pro Data Studio</h1>
+          <div class="sub">CRUD tabel dengan grafik sinkron X–Y, estetika light yang rapi, aksesibel, dan responsif.</div>
+        </div>
+      </div>
+      <div class="chips" role="group" aria-label="Pengaturan sumbu">
+        <div class="chip" title="Kolom untuk sumbu X">
+          <span>X</span>
+          <select id="xSelect" aria-label="Pilih kolom X"></select>
+        </div>
+        <div class="chip" title="Kolom untuk sumbu Y">
+          <span>Y</span>
+          <select id="ySelect" aria-label="Pilih kolom Y"></select>
+        </div>
+        <button class="btn ghost" id="resetBtn" type="button">Reset Data</button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- Tabel + Form -->
+      <section class="card" aria-labelledby="dataCardTitle">
+        <div class="card-head">
+          <h2 id="dataCardTitle">Data Tabel Interaktif</h2>
+          <small class="sub">Gunakan form untuk tambah atau pilih baris untuk edit.</small>
+        </div>
+        <div class="card-body">
+          <form id="dataForm" aria-label="Form data">
+            <div class="field">
+              <label for="name">Nama</label>
+              <input id="name" name="name" type="text" placeholder="Contoh: Alpha" required />
+            </div>
+            <div class="field">
+              <label for="xval">X</label>
+              <input id="xval" name="x" type="number" step="any" placeholder="Contoh: 1" required />
+            </div>
+            <div class="field">
+              <label for="yval">Y</label>
+              <input id="yval" name="y" type="number" step="any" placeholder="Contoh: 2.5" required />
+            </div>
+            <div class="field" style="flex:0 0 auto;">
+              <button class="btn" type="submit" id="submitBtn">Tambah</button>
+            </div>
+            <div class="field" style="flex:0 0 auto;">
+              <button class="btn ghost" type="button" id="cancelEdit" hidden>Batal Edit</button>
+            </div>
+          </form>
+
+          <div class="table-wrap" role="region" aria-label="Pembungkus tabel bergulir">
+            <table id="dataTable">
+              <caption>Dataset sederhana dengan tiga kolom, dua kolom numerik dipakai sebagai sumbu grafik.</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Nama</th>
+                  <th scope="col">X</th>
+                  <th scope="col">Y</th>
+                  <th scope="col">Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Baris akan diisi via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Grafik -->
+      <section class="card" aria-labelledby="chartCardTitle">
+        <div class="card-head">
+          <h2 id="chartCardTitle">Grafik X–Y Sinkron</h2>
+          <small class="sub">Memperbarui otomatis setiap perubahan tabel.</small>
+        </div>
+        <div class="card-body">
+          <canvas id="chart" aria-label="Grafik sebar X Y"></canvas>
+          <div class="legend" aria-hidden="true">
+            <span class="dot p"></span><span>Data (Y vs X)</span>
+            <span class="dot l"></span><span>Tren Linear</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <footer>
+      Gunakan header, scope, dan caption untuk aksesibilitas tabel; hindari sel kosong/merged dan jadikan header jelas. [web:13][web:10][web:16]
+    </footer>
+  </div>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" integrity="sha384-6D6mVqC8yH4Hf8a9p0bTf3m7x8I3n2gV7T9Hn8t4t7Yg3zQmJv0Q6fWk0vS5E7c2" crossorigin="anonymous"></script>
+  <script>
+    // State
+    const initialData = [
+      { id: crypto.randomUUID(), name: "Alpha", x: 1, y: 2.5 },
+      { id: crypto.randomUUID(), name: "Beta",  x: 2, y: 3.1 },
+      { id: crypto.randomUUID(), name: "Gamma", x: 3, y: 3.9 },
+      { id: crypto.randomUUID(), name: "Delta", x: 4, y: 5.2 }
+    ];
+    let rows = [...initialData];
+    let editId = null;
+
+    // Elements
+    const tbody = document.querySelector("#dataTable tbody");
+    const form  = document.getElementById("dataForm");
+    const submitBtn = document.getElementById("submitBtn");
+    const cancelEditBtn = document.getElementById("cancelEdit");
+    const resetBtn = document.getElementById("resetBtn");
+    const xSelect = document.getElementById("xSelect");
+    const ySelect = document.getElementById("ySelect");
+
+    // Build table
+    function renderTable(){
+      tbody.innerHTML = "";
+      rows.forEach(r=>{
+        const tr = document.createElement("tr");
+        tr.dataset.id = r.id;
+
+        const tdName = document.createElement("td");
+        tdName.textContent = r.name;
+
+        const tdX = document.createElement("td");
+        tdX.textContent = r.x;
+        tdX.className = "num";
+
+        const tdY = document.createElement("td");
+        tdY.textContent = r.y;
+        tdY.className = "num";
+
+        const tdAct = document.createElement("td");
+        const act = document.createElement("div");
+        act.className = "row-actions";
+
+        const editBtn = document.createElement("button");
+        editBtn.type = "button";
+        editBtn.className = "link green";
+        editBtn.textContent = "Edit";
+        editBtn.onclick = ()=>beginEdit(r.id);
+
+        const delBtn = document.createElement("button");
+        delBtn.type = "button";
+        delBtn.className = "link red";
+        delBtn.textContent = "Hapus";
+        delBtn.onclick = ()=>removeRow(r.id);
+
+        act.append(editBtn, delBtn);
+        tdAct.append(act);
+
+        tr.append(tdName, tdX, tdY, tdAct);
+        tbody.append(tr);
+      });
+      syncAxisOptions();
+      refreshChart();
+    }
+
+    // Axis selector options
+    function syncAxisOptions(){
+      const columns = ["name","x","y"];
+      function fillSelect(sel, selected){
+        const prev = sel.value;
+        sel.innerHTML = "";
+        columns.forEach(col=>{
+          const o = document.createElement("option");
+          o.value = col;
+          o.textContent = col.toUpperCase();
+          sel.append(o);
+        });
+        sel.value = selected || prev || (sel === xSelect ? "x" : "y");
+      }
+      fillSelect(xSelect, xSelect.value || "x");
+      fillSelect(ySelect, ySelect.value || "y");
+      // Prevent identical axes if possible
+      if(xSelect.value === ySelect.value){
+        ySelect.value = (ySelect.value === "x" ? "y" : "x");
+      }
+    }
+
+    // CRUD
+    function beginEdit(id){
+      editId = id;
+      const r = rows.find(x=>x.id===id);
+      form.name.value = r.name;
+      form.x.value = r.x;
+      form.y.value = r.y;
+      submitBtn.textContent = "Simpan";
+      cancelEditBtn.hidden = false;
+
+      document.querySelectorAll("tbody tr").forEach(tr=>tr.classList.toggle("selected", tr.dataset.id===id));
+    }
+
+    function clearEdit(){
+      editId = null;
+      form.reset();
+      submitBtn.textContent = "Tambah";
+      cancelEditBtn.hidden = true;
+      document.querySelectorAll("tbody tr").forEach(tr=>tr.classList.remove("selected"));
+    }
+
+    function removeRow(id){
+      rows = rows.filter(r=>r.id!==id);
+      if(editId===id) clearEdit();
+      renderTable();
+    }
+
+    form.addEventListener("submit", e=>{
+      e.preventDefault();
+      const name = form.name.value.trim();
+      const x = Number(form.x.value);
+      const y = Number(form.y.value);
+      if(!name || Number.isNaN(x) || Number.isNaN(y)) return;
+
+      if(editId){
+        rows = rows.map(r=> r.id===editId ? {...r, name, x, y} : r);
+        clearEdit();
+      }else{
+        rows.push({ id: crypto.randomUUID(), name, x, y });
+      }
+      renderTable();
+    });
+
+    cancelEditBtn.addEventListener("click", clearEdit);
+    resetBtn.addEventListener("click", ()=>{
+      rows = [...initialData];
+      clearEdit();
+      renderTable();
+    });
+
+    // Chart.js setup (scatter + linear trend)
+    const ctx = document.getElementById("chart").getContext("2d");
+    let chart = null;
+
+    function computeTrend(points){
+      // Linear regression y = a + b x
+      const n = points.length;
+      if(n<2) return null;
+      const sumX = points.reduce((s,p)=>s+p.x,0);
+      const sumY = points.reduce((s,p)=>s+p.y,0);
+      const sumXY = points.reduce((s,p)=>s+p.x*p.y,0);
+      const sumXX = points.reduce((s,p)=>s+p.x*p.x,0);
+      const b = (n*sumXY - sumX*sumY) / (n*sumXX - sumX*sumX || 1);
+      const a = (sumY - b*sumX) / n;
+      const xs = points.map(p=>p.x).sort((a,b)=>a-b);
+      const x1 = xs[0], x2 = xs[xs.length-1];
+      return [
+        {x:x1, y:a + b*x1},
+        {x:x2, y:a + b*x2}
+      ];
+    }
+
+    function getXY(){
+      const xKey = xSelect.value;
+      const yKey = ySelect.value;
+      // If user selects "name" for axis, attempt categorical mapping to index
+      const map = r => ({
+        x: (xKey==="name") ? [...rows].findIndex(q=>q.id===r.id)+1 : Number(r[xKey]),
+        y: (yKey==="name") ? [...rows].findIndex(q=>q.id===r.id)+1 : Number(r[yKey]),
+        label: r.name
+      });
+      const pts = rows.map(map).filter(p=>Number.isFinite(p.x) && Number.isFinite(p.y));
+      return pts;
+    }
+
+    function refreshChart(){
+      const pts = getXY();
+      const trend = computeTrend(pts) || [];
+      const data = {
+        datasets: [
+          {
+            type: "scatter",
+            label: "Data",
+            data: pts.map(p=>({x:p.x, y:p.y})),
+            pointRadius: 5,
+            pointHoverRadius: 6,
+            backgroundColor: "rgba(37,99,235,.9)",
+            borderColor: "rgba(37,99,235,.9)"
+          },
+          {
+            type: "line",
+            label: "Trend",
+            data: trend,
+            pointRadius: 0,
+            borderWidth: 2,
+            borderColor: "rgba(148,163,184,1)",
+            borderDash: [6,6],
+            tension: 0
+          }
+        ]
+      };
+      const axisTitle = (k)=> (k==="name" ? "Index" : k.toUpperCase());
+      const cfg = {
+        type: "scatter",
+        data,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: { duration: 250 },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks:{
+                title:(items)=> {
+                  const i = items[0].dataIndex;
+                  return rows[i]?.name ?? "Data";
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              title: { display:true, text: axisTitle(xSelect.value) },
+              grid: { color:"rgba(226,232,240,.6)" },
+              ticks:{ color:"#334155" }
+            },
+            y: {
+              title: { display:true, text: axisTitle(ySelect.value) },
+              grid: { color:"rgba(226,232,240,.6)" },
+              ticks:{ color:"#334155" }
+            }
+          }
+        }
+      };
+      if(chart){ chart.data = data; chart.options = cfg.options; chart.update(); }
+      else{ chart = new Chart(ctx, cfg); }
+    }
+
+    xSelect.addEventListener("change", refreshChart);
+    ySelect.addEventListener("change", refreshChart);
+
+    // Init
+    renderTable();
+  </script>
+</body>
+</html>
