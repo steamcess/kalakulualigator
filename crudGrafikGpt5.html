@@ -1,0 +1,559 @@
+<!doctype html>
+
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Data Atelier — CRUD Table & Live Chart</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/feather-icons"></script>
+  <style>
+    :root{
+      --bg: #f6f7fb;
+      --bg-soft: #ffffffcc;
+      --card: #ffffff;
+      --text: #101828;
+      --muted: #667085;
+      --border: #EAECF0;
+      --primary: #3b82f6; /* azure */
+      --primary-600:#2563eb;
+      --accent: #22c55e; /* jade */
+      --warn: #ef4444;
+      --radius: 16px;
+      --shadow: 0 10px 30px rgba(16,24,40,.08), 0 2px 8px rgba(16,24,40,.06);
+      --shadow-soft: 0 1px 3px rgba(16,24,40,.08), 0 1px 2px rgba(16,24,40,.06);
+    }*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; font-family:Inter,system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji";
+  color:var(--text); background:
+    radial-gradient(1200px 400px at -10% -20%, #c7d2fe33 0%, transparent 60%),
+    radial-gradient(900px 350px at 110% -10%, #a7f3d033 0%, transparent 60%),
+    var(--bg);
+}
+
+header{
+  position:sticky; top:0; z-index:5;
+  backdrop-filter:saturate(1.4) blur(8px);
+  background:linear-gradient(180deg, #ffffffd9, #ffffffb8 60%, transparent);
+  border-bottom:1px solid var(--border);
+}
+
+.wrap{max-width:1200px; margin:0 auto; padding:18px 20px}
+
+.titlebar{display:flex; align-items:center; gap:14px}
+.logo{width:42px; height:42px; border-radius:12px; background:linear-gradient(135deg,#c7d2fe,#93c5fd,#86efac); box-shadow:var(--shadow-soft); display:grid; place-items:center}
+.logo svg{opacity:.85}
+h1{font-size: clamp(18px, 2.2vw, 26px); margin:0; letter-spacing:.2px}
+.sub{color:var(--muted); font-weight:500}
+
+.toolbar{
+  display:flex; flex-wrap:wrap; gap:10px; margin-top:14px
+}
+
+.btn{display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border-radius:12px; border:1px solid var(--border); background:var(--card); color:var(--text); font-weight:600; cursor:pointer; box-shadow:var(--shadow-soft); transition:.25s ease}
+.btn:hover{transform:translateY(-1px); box-shadow:var(--shadow)}
+.btn.primary{background:linear-gradient(180deg,#eff6ff,#dbeafe); color:#0b3b8f; border-color:#c7d2fe}
+.btn.destructive{color:#991b1b; background:linear-gradient(180deg,#fff1f2,#ffe4e6); border-color:#fecdd3}
+.btn.ghost{background:transparent}
+
+.grid{display:grid; grid-template-columns: 1.2fr .8fr; gap:16px; padding:18px 20px}
+@media (max-width: 980px){ .grid{ grid-template-columns:1fr; } }
+
+.card{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden}
+.card h3{margin:0; padding:14px 16px; border-bottom:1px solid var(--border); font-size:15px}
+
+.panel{padding:16px}
+
+.statbar{display:grid; grid-template-columns:repeat(4,1fr); gap:12px}
+.stat{background:linear-gradient(180deg,#ffffff,#fafafa); border:1px solid var(--border); border-radius:14px; padding:12px 14px; box-shadow:var(--shadow-soft)}
+.stat .k{color:var(--muted); font-size:12px}
+.stat .v{font-size:20px; font-weight:700; margin-top:4px}
+@media (max-width: 680px){ .statbar{grid-template-columns:repeat(2,1fr)} }
+
+/* Table */
+.tablewrap{overflow:auto; border-radius:0 0 var(--radius) var(--radius)}
+table{width:100%; border-collapse:separate; border-spacing:0}
+thead th{position:sticky; top:0; background:#fcfcfd; border-bottom:1px solid var(--border); font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:#475467; padding:12px; text-align:left}
+tbody td{border-bottom:1px solid #f1f3f6; padding:12px; font-size:14px}
+tbody tr:hover{background:#fafcff}
+tbody tr.empty td{color:var(--muted); text-align:center; padding:40px}
+.chip{display:inline-flex; align-items:center; gap:6px; background:#f1f5f9; border:1px solid #e2e8f0; padding:4px 8px; border-radius:999px; font-size:12px}
+
+.controls{display:flex; gap:8px; align-items:center}
+.controls .select{border:1px solid var(--border); background:var(--card); border-radius:12px; padding:8px 12px; display:flex; align-items:center; gap:10px; box-shadow:var(--shadow-soft)}
+.controls label{font-size:12px; color:var(--muted)}
+.controls select{border:none; background:transparent; font-weight:600; outline:none}
+
+.switch{display:inline-flex; align-items:center; gap:10px; font-size:13px; color:var(--muted)}
+.switch input{appearance:none; width:40px; height:24px; border-radius:999px; background:#e5e7eb; position:relative; outline:none; cursor:pointer; transition:.2s}
+.switch input:checked{background:#c7d2fe}
+.switch input::after{content:""; position:absolute; top:3px; left:3px; width:18px; height:18px; background:#fff; border-radius:999px; box-shadow:0 1px 2px rgba(0,0,0,.15); transition:.2s}
+.switch input:checked::after{left:19px}
+
+dialog::backdrop{background:rgba(16,24,40,.35); backdrop-filter:blur(4px)}
+dialog{border:none; padding:0; border-radius:18px; width:min(560px, 92vw); box-shadow:var(--shadow)}
+.modal{background:var(--card); border:1px solid var(--border); border-radius:18px; overflow:hidden}
+.modal header{position:unset; background:linear-gradient(180deg,#f8fafc,#fff); border-bottom:1px solid var(--border)}
+.modal .panel{display:grid; gap:10px}
+.f{display:grid; gap:6px}
+.f label{font-size:12px; color:var(--muted)}
+.f input,.f textarea,.f select{border:1px solid var(--border); background:#fff; padding:10px 12px; border-radius:12px; font:inherit}
+.modal footer{display:flex; justify-content:flex-end; gap:10px; padding:14px 16px; border-top:1px solid var(--border); background:#fcfcfd}
+
+.note{font-size:12px; color:var(--muted)}
+.right{margin-left:auto}
+.icon{width:16px; height:16px; stroke-width:2}
+.action{cursor:pointer; padding:6px 8px; border-radius:8px; border:1px solid transparent}
+.action:hover{background:#f1f5f9; border-color:#e2e8f0}
+.danger:hover{background:#fee2e2; border-color:#fecaca}
+
+canvas{max-height: 440px}
+
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <div class="titlebar">
+        <div class="logo" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0f172a"><path d="M12 3l2.5 5.5L20 11l-5.5 2.5L12 19l-2.5-5.5L4 11l5.5-2.5L12 3z" stroke-width="1.6"/></svg>
+        </div>
+        <div>
+          <h1>Data Atelier — Tabel CRUD & Grafik Live</h1>
+          <div class="sub">Light theme modern, profesional, dan bernilai seni.</div>
+        </div>
+        <div class="right toolbar">
+          <button class="btn primary" id="btnAdd"><i data-feather="plus"></i> Tambah Baris</button>
+          <button class="btn" id="btnExport"><i data-feather="download"></i> Export JSON</button>
+          <input type="file" id="fileImport" accept="application/json" hidden>
+          <button class="btn" id="btnImport"><i data-feather="upload"></i> Import</button>
+          <button class="btn ghost" id="btnReset"><i data-feather="refresh-ccw"></i> Reset</button>
+        </div>
+      </div><div class="toolbar" style="margin-top:10px">
+    <div class="controls select">
+      <label for="chartType">Grafik</label>
+      <select id="chartType">
+        <option value="scatter">Scatter</option>
+        <option value="line">Line</option>
+      </select>
+    </div>
+    <div class="controls select">
+      <label for="xScale">Sumbu X</label>
+      <select id="xScale">
+        <option value="linear">Linear</option>
+        <option value="logarithmic">Log</option>
+      </select>
+    </div>
+    <div class="controls select">
+      <label for="yScale">Sumbu Y</label>
+      <select id="yScale">
+        <option value="linear">Linear</option>
+        <option value="logarithmic">Log</option>
+      </select>
+    </div>
+    <div class="controls select">
+      <label>Aksi</label>
+      <button class="btn" id="btnSwap"><i data-feather="switch"></i> Tukar X↔Y</button>
+    </div>
+    <label class="switch" title="Simpan otomatis ke LocalStorage">
+      <input type="checkbox" id="persistToggle" checked>
+      Auto-save</label>
+  </div>
+</div>
+
+  </header>  <main class="wrap">
+    <div class="grid">
+      <section class="card">
+        <h3>Data Tabel</h3>
+        <div class="panel">
+          <div class="statbar" id="stats">
+            <div class="stat"><div class="k">Jumlah</div><div class="v" id="sCount">0</div></div>
+            <div class="stat"><div class="k">Rata2 X</div><div class="v" id="sMeanX">–</div></div>
+            <div class="stat"><div class="k">Rata2 Y</div><div class="v" id="sMeanY">–</div></div>
+            <div class="stat"><div class="k">Korelasi r</div><div class="v" id="sCorr">–</div></div>
+          </div>
+        </div>
+        <div class="tablewrap">
+          <table id="dataTable">
+            <thead>
+              <tr>
+                <th data-key="label">Label</th>
+                <th data-key="x">X Value</th>
+                <th data-key="y">Y Value</th>
+                <th data-key="category">Kategori</th>
+                <th data-key="note">Catatan</th>
+                <th style="width: 110px">Aksi</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section><section class="card">
+    <h3>Grafik</h3>
+    <div class="panel">
+      <canvas id="chart"></canvas>
+      <div class="note" style="margin-top:10px">Grafik otomatis sinkron dengan data tabel. Warna dataset mengikuti <em>Kategori</em>.</div>
+    </div>
+  </section>
+</div>
+
+  </main>  <!-- Modal Add/Edit -->  <dialog id="modal">
+    <div class="modal">
+      <header class="wrap" style="padding:14px 16px">
+        <div class="titlebar" style="gap:10px">
+          <div class="logo" style="width:36px;height:36px;border-radius:10px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f172a"><path d="M12 3l2.5 5.5L20 11l-5.5 2.5L12 19l-2.5-5.5L4 11l5.5-2.5L12 3z" stroke-width="1.6"/></svg></div>
+          <div>
+            <strong id="modalTitle">Tambah Baris</strong>
+            <div class="note">Isi dua kolom nilai untuk sumbu X dan Y.</div>
+          </div>
+        </div>
+      </header>
+      <div class="panel">
+        <form id="formRow" class="panel">
+          <div class="f"><label>Label</label><input required name="label" placeholder="Contoh: Sample A"/></div>
+          <div class="f"><label>X Value</label><input required name="x" inputmode="decimal" placeholder="Mis. 10.5" /></div>
+          <div class="f"><label>Y Value</label><input required name="y" inputmode="decimal" placeholder="Mis. 25.2" /></div>
+          <div class="f"><label>Kategori</label>
+            <select name="category">
+              <option>Alpha</option>
+              <option>Beta</option>
+              <option>Gamma</option>
+            </select>
+          </div>
+          <div class="f"><label>Catatan</label><textarea name="note" rows="3" placeholder="Opsional"></textarea></div>
+          <input type="hidden" name="id" />
+        </form>
+      </div>
+      <footer>
+        <button class="btn" id="btnCancel"><i data-feather="x"></i> Batal</button>
+        <button class="btn primary" id="btnSave"><i data-feather="check"></i> Simpan</button>
+      </footer>
+    </div>
+  </dialog>  <script>
+    const $ = (q,el=document)=>el.querySelector(q);
+    const $$ = (q,el=document)=>[...el.querySelectorAll(q)];
+
+    // Seed data (akan disimpan ke localStorage bila toggle aktif)
+    const SAMPLE = [
+      {id: cid(), label:'Sample A', x: 12, y: 24, category:'Alpha', note:''},
+      {id: cid(), label:'Sample B', x: 18, y: 36, category:'Alpha', note:'anomaly?'} ,
+      {id: cid(), label:'Sample C', x: 9,  y: 19, category:'Beta', note:''},
+      {id: cid(), label:'Sample D', x: 25, y: 11, category:'Gamma', note:''},
+      {id: cid(), label:'Sample E', x: 30, y: 42, category:'Beta', note:''},
+      {id: cid(), label:'Sample F', x: 7,  y: 15, category:'Gamma', note:'outlier kecil'},
+    ];
+
+    const LS_KEY = 'data-atelier-crud';
+
+    let state = {
+      rows: [],
+      sort: { key: 'label', dir: 'asc' },
+      map: {x:'x', y:'y'}, // mapping sumbu ke kolom nilai
+      chartType: 'scatter',
+      xScale: 'linear', yScale: 'linear',
+      persist: true
+    };
+
+    // Elements
+    const tbody = $('#dataTable tbody');
+    const modal = $('#modal');
+    const form = $('#formRow');
+    const btnAdd = $('#btnAdd');
+    const btnSave = $('#btnSave');
+    const btnCancel = $('#btnCancel');
+    const btnExport = $('#btnExport');
+    const btnImport = $('#btnImport');
+    const fileImport = $('#fileImport');
+    const btnReset = $('#btnReset');
+    const btnSwap = $('#btnSwap');
+    const persistToggle = $('#persistToggle');
+    const chartTypeSel = $('#chartType');
+    const xScaleSel = $('#xScale');
+    const yScaleSel = $('#yScale');
+
+    // Stats
+    const sCount = $('#sCount');
+    const sMeanX = $('#sMeanX');
+    const sMeanY = $('#sMeanY');
+    const sCorr  = $('#sCorr');
+
+    // Chart
+    const ctx = $('#chart').getContext('2d');
+    let chart;
+
+    init();
+
+    function init(){
+      // Restore
+      const saved = localStorage.getItem(LS_KEY);
+      state.rows = saved ? safeParse(saved, SAMPLE) : SAMPLE;
+
+      persistToggle.checked = !!saved || state.persist;
+      state.persist = persistToggle.checked;
+
+      renderTable();
+      renderChart();
+      wire();
+      feather.replace();
+    }
+
+    function wire(){
+      btnAdd.addEventListener('click', ()=> openModal());
+      btnCancel.addEventListener('click', closeModal);
+      btnSave.addEventListener('click', saveFromModal);
+      btnExport.addEventListener('click', exportJSON);
+      btnImport.addEventListener('click', ()=> fileImport.click());
+      fileImport.addEventListener('change', importJSON);
+      btnReset.addEventListener('click', resetData);
+      btnSwap.addEventListener('click', ()=>{ const t=state.map.x; state.map.x=state.map.y; state.map.y=t; updateAll(); });
+      persistToggle.addEventListener('change', e=>{ state.persist = e.target.checked; if(state.persist){ persist(); }});
+      chartTypeSel.addEventListener('change', e=>{ state.chartType = e.target.value; renderChart(); });
+      xScaleSel.addEventListener('change', e=>{ state.xScale = e.target.value; renderChart(); });
+      yScaleSel.addEventListener('change', e=>{ state.yScale = e.target.value; renderChart(); });
+
+      // Sorting
+      $$('#dataTable thead th').forEach(th=>{
+        const key = th.dataset.key; if(!key) return;
+        th.style.cursor='pointer';
+        th.addEventListener('click', ()=>{ sortBy(key); });
+      });
+
+      // Inline edit on double click
+      tbody.addEventListener('dblclick', e=>{
+        const cell = e.target.closest('td');
+        const rowEl = e.target.closest('tr');
+        if(!cell || !rowEl) return;
+        const key = cell.dataset.key;
+        if(!['label','x','y','category','note'].includes(key)) return;
+        const id = rowEl.dataset.id;
+        const row = state.rows.find(r=>r.id===id);
+        if(!row) return;
+        inlineEdit(cell, row, key);
+      });
+    }
+
+    function renderTable(){
+      const rows = [...state.rows];
+      // apply sort
+      const {key, dir} = state.sort;
+      rows.sort((a,b)=>{
+        const va = a[key]; const vb = b[key];
+        if(typeof va === 'number' && typeof vb === 'number') return dir==='asc' ? va-vb : vb-va;
+        return dir==='asc' ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
+      });
+
+      tbody.innerHTML = '';
+      if(rows.length===0){
+        const tr = document.createElement('tr'); tr.className='empty';
+        tr.innerHTML = `<td colspan="6">Belum ada data. Klik <strong>Tambah Baris</strong> untuk mulai.</td>`;
+        tbody.appendChild(tr);
+      }
+
+      for(const r of rows){
+        const tr = document.createElement('tr'); tr.dataset.id=r.id;
+        tr.innerHTML = `
+          <td data-key="label">${esc(r.label)}</td>
+          <td data-key="x">${numfmt(r.x)}</td>
+          <td data-key="y">${numfmt(r.y)}</td>
+          <td data-key="category"><span class="chip">${iconFor(r.category)} ${esc(r.category||'–')}</span></td>
+          <td data-key="note">${esc(r.note||'')}</td>
+          <td>
+            <span class="action" title="Edit" data-action="edit"><i data-feather="edit-3" class="icon"></i></span>
+            <span class="action danger" title="Hapus" data-action="del"><i data-feather="trash-2" class="icon"></i></span>
+          </td>`;
+        tbody.appendChild(tr);
+      }
+
+      // bind row actions
+      $$('tr [data-action="edit"]', tbody).forEach(btn=> btn.addEventListener('click', onEdit));
+      $$('tr [data-action="del"]', tbody).forEach(btn=> btn.addEventListener('click', onDelete));
+
+      updateStats();
+      if(state.persist) persist();
+      feather.replace();
+    }
+
+    function updateStats(){
+      const pts = state.rows.map(r=>({x: +r[state.map.x], y:+r[state.map.y]})).filter(p=>isFinite(p.x)&&isFinite(p.y));
+      sCount.textContent = pts.length;
+      const mean = arr => arr.length? (arr.reduce((a,b)=>a+b,0)/arr.length): NaN;
+      const xs = pts.map(p=>p.x), ys = pts.map(p=>p.y);
+      const mx = mean(xs), my = mean(ys);
+      sMeanX.textContent = isFinite(mx)? numfmt(mx): '–';
+      sMeanY.textContent = isFinite(my)? numfmt(my): '–';
+      sCorr.textContent = pts.length>1 ? numfmt(corr(xs,ys)) : '–';
+    }
+
+    function renderChart(){
+      const grouped = groupBy(state.rows, r=>r.category||'–');
+      const palettes = palette(Object.keys(grouped).length);
+      const datasets = Object.entries(grouped).map(([cat, arr], i)=>({
+        label: cat,
+        data: arr.map(r=>({ x: +r[state.map.x], y: +r[state.map.y], label:r.label })),
+        parsing:false,
+        borderWidth:2,
+        pointRadius: 3.5,
+        showLine: state.chartType==='line',
+        borderColor: palettes[i].stroke,
+        backgroundColor: palettes[i].fill,
+        tension: .25
+      }));
+
+      const cfg = {
+        type: state.chartType==='line' ? 'line' : 'scatter',
+        data: { datasets },
+        options: {
+          animation: { duration: 350 },
+          plugins: {
+            legend: { labels: { boxWidth: 10, usePointStyle: true } },
+            tooltip: {
+              callbacks: {
+                label: ctx => `${ctx.dataset.label} • ${ctx.raw.label}: (${numfmt(ctx.parsed.x)}, ${numfmt(ctx.parsed.y)})`
+              }
+            }
+          },
+          scales: {
+            x: { type: state.xScale, title: {display:true, text: labelFor(state.map.x)} , grid:{color:'#eef2f7'} },
+            y: { type: state.yScale, title: {display:true, text: labelFor(state.map.y)} , grid:{color:'#eef2f7'} }
+          }
+        }
+      };
+
+      if(chart){ chart.destroy(); }
+      chart = new Chart(ctx, cfg);
+      updateStats();
+    }
+
+    function labelFor(key){
+      return key==='x' ? 'X Value' : key==='y' ? 'Y Value' : key;
+    }
+
+    function onEdit(e){
+      const id = e.currentTarget.closest('tr').dataset.id;
+      const row = state.rows.find(r=>r.id===id);
+      openModal(row);
+    }
+
+    function onDelete(e){
+      const id = e.currentTarget.closest('tr').dataset.id;
+      const row = state.rows.find(r=>r.id===id);
+      if(!row) return;
+      if(confirm(`Hapus baris: ${row.label}?`)){
+        state.rows = state.rows.filter(r=>r.id!==id);
+        updateAll();
+      }
+    }
+
+    function openModal(row){
+      $('#modalTitle').textContent = row? 'Edit Baris' : 'Tambah Baris';
+      form.label.value = row?.label ?? '';
+      form.x.value = row?.x ?? '';
+      form.y.value = row?.y ?? '';
+      form.category.value = row?.category ?? 'Alpha';
+      form.note.value = row?.note ?? '';
+      form.id.value = row?.id ?? '';
+      modal.showModal();
+    }
+    function closeModal(){ modal.close(); }
+
+    function saveFromModal(){
+      const data = Object.fromEntries(new FormData(form).entries());
+      const x = parseFloat(String(data.x).replace(',','.'));
+      const y = parseFloat(String(data.y).replace(',','.'));
+      if(!isFinite(x) || !isFinite(y)){
+        alert('Kolom X dan Y harus berupa angka.');
+        return;
+      }
+      const row = { id: data.id || cid(), label: data.label.trim()||'–', x, y, category:data.category||'–', note:data.note||'' };
+      const idx = state.rows.findIndex(r=>r.id===row.id);
+      if(idx>=0) state.rows[idx]=row; else state.rows.push(row);
+      closeModal(); updateAll();
+    }
+
+    function inlineEdit(cell, row, key){
+      const old = key==='category' || key==='label' || key==='note' ? (row[key]||'') : row[key];
+      const input = document.createElement(key==='note' ? 'textarea' : 'input');
+      input.value = old;
+      input.style.width='100%'; input.style.font='inherit'; input.style.padding='6px 8px'; input.style.border='1px solid var(--border)'; input.style.borderRadius='8px';
+      const commit = ()=>{
+        let val = input.value;
+        if(key==='x'||key==='y'){
+          const num = parseFloat(String(val).replace(',','.'));
+          if(!isFinite(num)){ cell.innerHTML = numfmt(row[key]); return; }
+          row[key]=num;
+        }else{
+          row[key]=val;
+        }
+        updateAll();
+      }
+      input.addEventListener('blur', commit);
+      input.addEventListener('keydown', ev=>{ if(ev.key==='Enter' && key!=='note'){ ev.preventDefault(); input.blur();} });
+      cell.innerHTML=''; cell.appendChild(input); input.focus(); input.select();
+    }
+
+    function sortBy(key){
+      if(state.sort.key===key){ state.sort.dir = state.sort.dir==='asc'?'desc':'asc'; }
+      else { state.sort = {key, dir:'asc'}; }
+      renderTable(); renderChart();
+    }
+
+    function exportJSON(){
+      const data = JSON.stringify(state.rows, null, 2);
+      const blob = new Blob([data], {type:'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'data-atelier.json';
+      a.click(); URL.revokeObjectURL(a.href);
+    }
+
+    function importJSON(e){
+      const f = e.target.files[0]; if(!f) return; const reader = new FileReader();
+      reader.onload = () => {
+        const arr = safeParse(reader.result, []);
+        if(!Array.isArray(arr)) return alert('File tidak valid.');
+        // normalize
+        state.rows = arr.map(r=>({ id: r.id||cid(), label: r.label??'–', x: +r.x, y:+r.y, category:r.category??'–', note:r.note??'' }))
+                        .filter(r=>isFinite(r.x) && isFinite(r.y));
+        updateAll(); fileImport.value='';
+      };
+      reader.readAsText(f);
+    }
+
+    function resetData(){
+      if(confirm('Kembalikan ke data contoh?')){ state.rows = SAMPLE.map(r=>({...r})); updateAll(); }
+    }
+
+    function updateAll(){ renderTable(); renderChart(); }
+
+    function persist(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state.rows)); }catch(e){} }
+
+    // Utils
+    function groupBy(arr, fn){ return arr.reduce((acc,cur)=>{ const k=fn(cur); (acc[k]=acc[k]||[]).push(cur); return acc;},{}); }
+    function cid(){ return Math.random().toString(36).slice(2,9) + Date.now().toString(36).slice(-3); }
+    function esc(s){ return String(s).replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m])); }
+    function numfmt(n){ const x=+n; return isFinite(x)? new Intl.NumberFormat('id-ID', {maximumFractionDigits: 3}).format(x): String(n); }
+    function safeParse(text, fallback){ try{ return JSON.parse(text); }catch(e){ return fallback; } }
+    function corr(xs,ys){
+      const n=xs.length; const mx=xs.reduce((a,b)=>a+b,0)/n; const my=ys.reduce((a,b)=>a+b,0)/n;
+      let num=0, dx=0, dy=0; for(let i=0;i<n;i++){ const a=xs[i]-mx, b=ys[i]-my; num+=a*b; dx+=a*a; dy+=b*b; }
+      const d = Math.sqrt(dx*dy); return d? num/d : 0;
+    }
+    function iconFor(cat){
+      const map = {Alpha:'◯', Beta:'▣', Gamma:'△'}; return `<strong>${map[cat]||'●'}</strong>`;
+    }
+    function palette(n){
+      // pleasant, accessible palette
+      const base = [
+        {fill:'rgba(59,130,246,.20)', stroke:'rgba(59,130,246,.9)'},   // blue
+        {fill:'rgba(34,197,94,.20)',  stroke:'rgba(34,197,94,.9)'},    // green
+        {fill:'rgba(249,115,22,.20)', stroke:'rgba(249,115,22,.9)'},   // orange
+        {fill:'rgba(236,72,153,.20)', stroke:'rgba(236,72,153,.9)'},   // pink
+        {fill:'rgba(14,165,233,.20)', stroke:'rgba(14,165,233,.9)'},   // sky
+        {fill:'rgba(139,92,246,.20)', stroke:'rgba(139,92,246,.9)'},   // violet
+      ];
+      const out=[]; for(let i=0;i<n;i++){ out.push(base[i%base.length]); } return out;
+    }
+  </script></body>
+</html>
